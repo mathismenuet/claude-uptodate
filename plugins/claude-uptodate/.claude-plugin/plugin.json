@@ -1,0 +1,13 @@
+{
+  "name": "claude-uptodate",
+  "version": "0.1.0",
+  "description": "Local App Store for everything installed from GitHub on this machine: cloned repos, Claude Code skills and plugin marketplaces. Update badges, changelogs, append-only history, safe ff-only updates, visual dashboard.",
+  "author": {
+    "name": "Mathis Menuet",
+    "url": "https://github.com/mathismenuet"
+  },
+  "homepage": "https://github.com/mathismenuet/claude-uptodate",
+  "repository": "https://github.com/mathismenuet/claude-uptodate",
+  "license": "MIT",
+  "keywords": ["updates", "git", "github", "skills", "plugins", "marketplace", "dashboard"]
+}
