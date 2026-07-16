@@ -7,9 +7,10 @@ import type { ItemState, ManifestItem, Snapshot } from "@/lib/store-types";
 import { ItemRow } from "@/components/store/ItemRow";
 import { DetailPanel } from "@/components/store/DetailPanel";
 import { OrphansPanel } from "@/components/store/OrphansPanel";
+import { LibraryPanel } from "@/components/store/LibraryPanel";
 import { isSafeUpdatable, rowKind } from "@/components/store/meta";
 
-type Tab = "all" | "repos" | "skills" | "plugins" | "orphans";
+type Tab = "all" | "repos" | "skills" | "plugins" | "orphans" | "library";
 
 const TABS: { id: Tab; label: string }[] = [
   { id: "all", label: "Tout" },
@@ -17,6 +18,7 @@ const TABS: { id: Tab; label: string }[] = [
   { id: "skills", label: "Skills" },
   { id: "plugins", label: "Plugins" },
   { id: "orphans", label: "Sans source" },
+  { id: "library", label: "📚 Bibliothèque" },
 ];
 
 const KIND_ORDER: Record<string, number> = {
@@ -139,6 +141,7 @@ export default function Home() {
     skills: items.filter((i) => i.type.startsWith("skill-")).length,
     plugins: items.filter((i) => i.type === "marketplace").length,
     orphans: orphans.length,
+    library: -1, // le compte vit dans l'onglet lui-même
   }), [items, orphans]);
 
   const selected = selectedKey ? items.find((i) => i.key === selectedKey) || null : null;
@@ -224,7 +227,9 @@ export default function Home() {
               }`}
             >
               {t.label}
-              <span className="ml-1.5 text-[11px] font-medium text-neutral-400">{counts[t.id]}</span>
+              {counts[t.id] >= 0 && (
+                <span className="ml-1.5 text-[11px] font-medium text-neutral-400">{counts[t.id]}</span>
+              )}
             </button>
           ))}
         </nav>
@@ -234,6 +239,8 @@ export default function Home() {
           <div className="grid place-items-center rounded-3xl border border-black/5 bg-white py-24 dark:border-white/10 dark:bg-[#161618]">
             <Loader2 className="size-6 animate-spin text-neutral-400" />
           </div>
+        ) : tab === "library" ? (
+          <LibraryPanel query={query} />
         ) : tab === "orphans" ? (
           <OrphansPanel orphans={orphans} query={query} onMapped={loadSnapshot} />
         ) : !snap?.state ? (

@@ -25,6 +25,7 @@ node "$APP_ROOT/bin/uptodate.mjs" report               # re-print last report
 node "$APP_ROOT/bin/uptodate.mjs" update <name>|--all  # safe updates (ff-only, refuses dirty)
 node "$APP_ROOT/bin/uptodate.mjs" map <skill> <owner/repo> [--path sub/dir]
 node "$APP_ROOT/bin/uptodate.mjs" history [name]
+node "$APP_ROOT/bin/uptodate.mjs" library [--refresh]   # typology library + mission baskets
 ```
 
 Data lives in `~/.claude/repo-radar/` (config.json to customize scan roots, history.jsonl

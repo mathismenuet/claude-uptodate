@@ -2,6 +2,21 @@
 
 Toutes les évolutions notables de Claude UpToDate. / All notable changes.
 
+## [0.2.0] — 2026-07-16
+
+### Ajouté / Added
+- **M2 Bibliothèque** (`engine/library.mjs`) : scan de TOUT l'outillage IA de la machine
+  (skills Claude user + marketplaces de plugins + Codex + Gemini/Antigravity), ~943 outils
+  classés en 17 catégories d'usage par mots-clés + annotations soignées « quand y penser »
+  pour les outils clés, dédupliqués par realpath, surcharges persistantes
+  (`library-overrides.json`).
+- **Onglet 📚 Bibliothèque** : chips catégories, recherche, fiches avec invocation
+  copiable + badge surface (Claude/Codex/Gemini) + provenance.
+- **🧺 Paniers de mission** (`baskets.json`, personnalisables) : kits d'outils par type de
+  tâche + bouton « Copier le brief pour Claude » (markdown prêt à coller en début de session).
+- CLI : `uptodate library [--refresh]`.
+- `docs/PRD.md` : cadrage v0.2 → v0.5 (bibliothèque, surfaces multi-LLM, conseiller, self-update).
+
 ## [0.1.0] — 2026-07-16
 
 Première release. / Initial release.

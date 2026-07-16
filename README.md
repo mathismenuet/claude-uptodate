@@ -16,6 +16,9 @@ keep the history.
 - 🔴 **Update badges** — behind-count per item, App Store style
 - 📜 **Changelogs** — the actual upstream commits & latest release for each item
 - 🕰 **History** — append-only journal: *"updated on July 16 — here's what arrived"*
+- 📚 **Library** — every skill on the machine (Claude user skills, plugin marketplaces,
+  Codex, Gemini) classified into 17 usage categories with "when to think of it"
+  annotations, plus **mission baskets** and a copy-paste tooling brief for Claude
 - ⬇️ **Safe updates** — `git pull --ff-only` only; anything with local modifications is
   refused and flagged for manual handling
 - ❓ **Orphan skills** — skills copied without provenance are listed; map them to their
@@ -55,6 +58,7 @@ node bin/uptodate.mjs report               # re-print the last report
 node bin/uptodate.mjs update <name>|--all  # safe updates (ff-only, refuses local changes)
 node bin/uptodate.mjs map <skill> <owner/repo> [--path sub/dir]
 node bin/uptodate.mjs history [name]       # the timeline
+node bin/uptodate.mjs library [--refresh]  # typology library + mission baskets
 ```
 
 ## Configuration

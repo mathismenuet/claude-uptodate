@@ -2,6 +2,7 @@
 // CLI claude-uptodate — utilisable sans l'interface web (cron, tâches planifiées, agents).
 //   node bin/uptodate.mjs scan | check [--no-fetch] | report | update <nom>|--all | map <skill> <owner/repo> [--path p] | history [nom]
 import * as engine from "../engine/core.mjs";
+import * as library from "../engine/library.mjs";
 
 const [, , cmd = "help", ...rest] = process.argv;
 const has = (f) => rest.includes(f);
@@ -47,6 +48,16 @@ async function main() {
       const res = await engine.mapSkill({ skill, slug, path: val("--path") });
       res.log.forEach((l) => console.log(l));
       process.exitCode = res.ok ? 0 : 1;
+      break;
+    }
+    case "library": {
+      const lib = await library.readLibrary({ refresh: has("--refresh") });
+      console.log(`📚 Bibliothèque : ${lib.count} outils (générée ${lib.generated_at})`);
+      for (const c of lib.categories.filter((c) => c.count > 0)) {
+        console.log(`  ${c.emoji} ${c.label} : ${c.count}`);
+      }
+      console.log(`\n🧺 Paniers : ${lib.baskets.map((b) => `${b.emoji} ${b.label} (${b.items.length})`).join(" · ")}`);
+      console.log("\nInterface : npm run dev -- -p 4517 → onglet Bibliothèque. --refresh pour re-scanner.");
       break;
     }
     case "history": {

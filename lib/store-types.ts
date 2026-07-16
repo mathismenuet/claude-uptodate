@@ -86,3 +86,42 @@ export interface Snapshot {
   manifest: Manifest | null;
   state: State | null;
 }
+
+// ------------------------------ M2 Bibliothèque ------------------------------
+
+export interface LibraryEntry {
+  id: string;
+  type: "skill";
+  name: string;
+  surface: "claude" | "codex" | "gemini" | string;
+  container: string; // "user" | "marketplace:<nom>"
+  path: string;
+  description: string;
+  category: string;
+  when: string;
+  curated: boolean;
+  invocation: string;
+}
+
+export interface LibraryCategory {
+  id: string;
+  label: string;
+  emoji: string;
+  count: number;
+}
+
+export interface LibraryBasket {
+  id: string;
+  emoji: string;
+  label: string;
+  match: string[];
+  items: string[]; // ids résolus
+}
+
+export interface LibraryData {
+  generated_at: string;
+  count: number;
+  categories: LibraryCategory[];
+  entries: LibraryEntry[];
+  baskets: LibraryBasket[];
+}
