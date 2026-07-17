@@ -11,9 +11,10 @@ import { LibraryPanel } from "@/components/store/LibraryPanel";
 import { DashboardPanel } from "@/components/store/DashboardPanel";
 import { SurfacesPanel } from "@/components/store/SurfacesPanel";
 import { LegendPanel } from "@/components/store/LegendPanel";
+import { ConnectionsPanel } from "@/components/store/ConnectionsPanel";
 import { isSafeUpdatable, rowKind } from "@/components/store/meta";
 
-type Tab = "all" | "repos" | "skills" | "plugins" | "orphans" | "library" | "dashboard" | "surfaces" | "legend";
+type Tab = "all" | "repos" | "skills" | "plugins" | "orphans" | "library" | "dashboard" | "surfaces" | "connections" | "legend";
 
 const TABS: { id: Tab; label: string }[] = [
   { id: "all", label: "Tout" },
@@ -24,6 +25,7 @@ const TABS: { id: Tab; label: string }[] = [
   { id: "library", label: "📚 Bibliothèque" },
   { id: "dashboard", label: "📊 Dashboard" },
   { id: "surfaces", label: "🗺 Surfaces" },
+  { id: "connections", label: "🔌 Connexions" },
   { id: "legend", label: "❔ Légende" },
 ];
 
@@ -57,7 +59,8 @@ export default function Home() {
 
   useEffect(() => { loadSnapshot(); }, [loadSnapshot]);
 
-  const runCheck = useCallback(async (withFetch = true, rescan = false) => {
+  // rescan=true par défaut : « Vérifier » découvre AUSSI les nouveaux clones/skills
+  const runCheck = useCallback(async (withFetch = true, rescan = true) => {
     setChecking(true);
     setError(null);
     try {
@@ -150,6 +153,7 @@ export default function Home() {
     library: -1, // le compte vit dans l'onglet lui-même
     dashboard: -1,
     surfaces: -1,
+    connections: -1,
     legend: -1,
   }), [items, orphans]);
 
@@ -254,6 +258,8 @@ export default function Home() {
           <DashboardPanel query={query} />
         ) : tab === "surfaces" ? (
           <SurfacesPanel />
+        ) : tab === "connections" ? (
+          <ConnectionsPanel query={query} />
         ) : tab === "legend" ? (
           <LegendPanel />
         ) : tab === "orphans" ? (
@@ -297,6 +303,35 @@ export default function Home() {
           </ul>
         )}
 
+        {/* 🍺 Homebrew — installations hors git (apps/CLI) détectées en retard au check */}
+        {tab === "all" && !loading && (snap?.state?.brew?.length || 0) > 0 && (
+          <section className="mt-6">
+            <h3 className="mb-2 px-1 text-sm font-semibold uppercase tracking-wide text-neutral-400">
+              🍺 Homebrew en retard ({snap!.state!.brew!.length})
+            </h3>
+            <ul className="divide-y divide-black/5 overflow-hidden rounded-3xl border border-black/5 bg-white shadow-sm dark:divide-white/[.06] dark:border-white/10 dark:bg-[#161618]">
+              {snap!.state!.brew!.map((b) => (
+                <li key={b.name} className="flex items-center gap-4 px-4 py-3">
+                  <div className="grid size-12 shrink-0 place-items-center rounded-2xl bg-gradient-to-br from-yellow-400 to-amber-600 text-xl shadow-sm">
+                    🍺
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate font-semibold leading-tight">{b.name}{b.cask ? " (app)" : ""}</p>
+                    <p className="truncate text-[13px] text-neutral-500">{b.installed || "?"} → {b.latest || "?"}</p>
+                  </div>
+                  <button
+                    onClick={() => runUpdate(b.name, `brew:${b.name}`)}
+                    disabled={updating.has(`brew:${b.name}`)}
+                    className="shrink-0 rounded-full bg-[#0071e3] px-4 py-1.5 text-[13px] font-semibold text-white transition hover:bg-[#0077ed] active:scale-95 disabled:opacity-60"
+                  >
+                    {updating.has(`brew:${b.name}`) ? <Loader2 className="size-4 animate-spin" /> : "METTRE À JOUR"}
+                  </button>
+                </li>
+              ))}
+            </ul>
+          </section>
+        )}
+
         <footer className="mt-10 flex flex-wrap items-center justify-between gap-2 text-xs text-neutral-400">
           <span>
             Données : <code className="font-mono">{snap?.data_dir || "~/.claude/repo-radar"}</code>
@@ -307,7 +342,7 @@ export default function Home() {
             rel="noreferrer"
             className="hover:text-[#0071e3]"
           >
-            claude-uptodate v0.3.0 — open source
+            claude-uptodate v0.4.0 — open source
           </a>
         </footer>
       </main>

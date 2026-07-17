@@ -344,6 +344,23 @@ async function checkApiItem(it) {
   return rec;
 }
 
+async function collectBrewOutdated() {
+  // paquets Homebrew en retard (apps/CLI installées hors git — ex. OpenHuman, gh, ffmpeg)
+  const r = await sh("brew", ["outdated", "--json=v2"], { timeout: 90000 });
+  if (r.code !== 0 || !r.out) return [];
+  try {
+    const j = JSON.parse(r.out);
+    const out = [];
+    for (const f of j.formulae || []) {
+      out.push({ name: f.name, installed: (f.installed_versions || [])[0] || "", latest: f.current_version || "", cask: false });
+    }
+    for (const c of j.casks || []) {
+      out.push({ name: c.name, installed: String(c.installed_versions || ""), latest: c.current_version || "", cask: true });
+    }
+    return out;
+  } catch { return []; }
+}
+
 async function checkRelease(slug) {
   const rel = await ghApi(`repos/${slug}/releases/latest`);
   if (rel && typeof rel === "object" && rel.tag_name) {
@@ -418,19 +435,20 @@ export async function check({ fetch: doFetch = true, rescan = false, onProgress 
   }
 
   await saveJson(F.mapping, mapping);
-  await saveJson(F.state, { checked_at: ts, items: results });
-  const report = renderReport(cfg, manifest, results);
+  const brew = await collectBrewOutdated();
+  await saveJson(F.state, { checked_at: ts, items: results, brew });
+  const report = renderReport(cfg, manifest, results, brew);
   await fs.mkdir(F.reports, { recursive: true });
   const d = new Date();
   const stamp = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}_${String(d.getHours()).padStart(2, "0")}${String(d.getMinutes()).padStart(2, "0")}`;
   await fs.writeFile(path.join(F.reports, `${stamp}.md`), report, "utf-8");
   await fs.writeFile(F.latest, report, "utf-8");
-  return { manifest, state: { checked_at: ts, items: results }, report };
+  return { manifest, state: { checked_at: ts, items: results, brew }, report };
 }
 
 // ------------------------------------------------------------------- report
 
-export function renderReport(cfg, manifest, results) {
+export function renderReport(cfg, manifest, results, brew = []) {
   const counts = {};
   for (const it of manifest.items) counts[it.type] = (counts[it.type] || 0) + 1;
   const byKey = Object.fromEntries(manifest.items.map((i) => [i.key, i]));
@@ -526,6 +544,15 @@ export function renderReport(cfg, manifest, results) {
     L.push("");
   }
 
+  if (brew.length) {
+    L.push(`## 🍺 Homebrew en retard (${brew.length})`);
+    for (const b of brew.slice(0, 25)) {
+      L.push(`- **${b.name}**${b.cask ? " (app)" : ""} : ${b.installed} → ${b.latest}  · \`brew upgrade ${b.cask ? "--cask " : ""}${b.name}\``);
+    }
+    if (brew.length > 25) L.push(`- … et ${brew.length - 25} autre(s)`);
+    L.push("");
+  }
+
   const orphans = manifest.orphans || [];
   if (orphans.length) {
     L.push(`## ❓ Skills sans source connue (${orphans.length})`);
@@ -551,7 +578,25 @@ export async function update({ name = "", all = false } = {}) {
   } else {
     const q = name.toLowerCase();
     targets = manifest.items.filter((it) => it.name.toLowerCase().includes(q));
-    if (!targets.length) return { ok: false, log: [`Aucun élément ne correspond à « ${name} ».`] };
+    if (!targets.length) {
+      // repli : paquet Homebrew signalé en retard au dernier check
+      const b = (state.brew || []).find((x) => x.name.toLowerCase() === q) ||
+        (state.brew || []).find((x) => x.name.toLowerCase().includes(q));
+      if (b) {
+        log.push(`→ brew upgrade ${b.cask ? "--cask " : ""}${b.name} (${b.installed} → ${b.latest})…`);
+        const r = await sh("brew", ["upgrade", ...(b.cask ? ["--cask"] : []), b.name], { timeout: 900000 });
+        log.push((r.out || r.err).split("\n").slice(-6).join("\n").slice(0, 600));
+        if (r.code === 0) {
+          await appendHistory({ ts: nowIso(), key: `brew:${b.name}`, name: b.name, type: "brew", event: "updated", from: b.installed, to: b.latest });
+          log.push(`✓ ${b.name} : mis à jour via Homebrew.`);
+          state.brew = (state.brew || []).filter((x) => x.name !== b.name);
+          await saveJson(F.state, state);
+          return { ok: true, log, updated: [b.name] };
+        }
+        return { ok: false, log };
+      }
+      return { ok: false, log: [`Aucun élément ne correspond à « ${name} ».`] };
+    }
     if (targets.length > 1) {
       const exact = targets.filter((t) => t.name.toLowerCase() === q);
       if (exact.length === 1) targets = exact;

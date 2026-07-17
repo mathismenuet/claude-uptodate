@@ -2,6 +2,26 @@
 
 Toutes les évolutions notables de Claude UpToDate. / All notable changes.
 
+## [0.4.0] — 2026-07-17
+
+### Ajouté / Added
+- **🔌 Connexions** (`engine/connections.mjs`) : cartographie des MCP des 4 familles
+  (serveurs perso `~/.claude.json`, MCP de plugins, connecteurs claude.ai, extensions
+  desktop) avec **état réel** via `claude mcp list` (🟢 connecté / 🟠 auth requise /
+  🔴 injoignable), groupés par catégorie d'usage, filtres d'état, et **actions de
+  reconnexion** (lien claude.ai/settings/connectors, commande terminal copiable,
+  test de la commande du serveur). Cache 30 min, bouton « Re-tester ».
+- **🔑 Clés API** : inventaire des clés connues (noms uniquement, jamais les valeurs) —
+  définies où (~/.zshrc, settings.json, .env projet, session) — avec les features
+  débloquées et le lien « obtenir une clé » ; détection des clés supplémentaires.
+- **🐳 Stacks Docker** : conteneurs actifs groupés par projet compose (Twenty CRM,
+  Invoice Ninja, n8n…) + commande de mise à jour copiable.
+- **🍺 Homebrew** : paquets/apps en retard détectés au check, section dédiée dans
+  Mises à jour + bouton « Mettre à jour » (brew upgrade) + rapport CLI.
+- **« Vérifier » re-scanne l'inventaire** : les nouveaux clones/skills installés
+  depuis le dernier check apparaissent désormais immédiatement.
+- CLI : `connections [--refresh]`.
+
 ## [0.3.0] — 2026-07-17
 
 ### Ajouté / Added

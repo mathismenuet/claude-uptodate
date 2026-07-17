@@ -57,9 +57,17 @@ export interface Manifest {
   own_repos_skipped: string[];
 }
 
+export interface BrewOutdated {
+  name: string;
+  installed: string;
+  latest: string;
+  cask: boolean;
+}
+
 export interface State {
   checked_at: string;
   items: Record<string, ItemState>;
+  brew?: BrewOutdated[];
 }
 
 export interface HistoryEvent {
@@ -205,4 +213,55 @@ export interface SurfacesReport {
   generated_at: string;
   surfaces: SurfaceInfo[];
   duplicates: DuplicateGroup[];
+}
+
+// ------------------------------ v0.4 Connexions ------------------------------
+
+export type McpStatus = "connected" | "needs-auth" | "failed" | "installed" | "unknown";
+
+export interface McpAction {
+  kind: "command" | "link" | "info";
+  label: string;
+  value: string;
+}
+
+export interface McpEntry {
+  name: string;
+  family: "user" | "plugin" | "claude.ai" | "desktop-ext";
+  scope: string;
+  transport: string;
+  detail: string;
+  status: McpStatus;
+  category: string;
+  actions: McpAction[];
+}
+
+export interface ApiKeyRow {
+  env: string;
+  label: string;
+  features: string;
+  url: string;
+  defined: boolean;
+  where: string[];
+}
+
+export interface DockerContainer {
+  name: string;
+  image: string;
+  status: string;
+  ports: string;
+}
+
+export interface DockerProject {
+  project: string;
+  containers: DockerContainer[];
+  update_hint: string;
+}
+
+export interface ConnectionsReport {
+  generated_at: string;
+  mcp: McpEntry[];
+  health_error: string | null;
+  apiKeys: { rows: ApiKeyRow[]; extra: string[] };
+  docker: { available: boolean; error?: string; projects: DockerProject[] };
 }

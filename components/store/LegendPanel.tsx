@@ -67,6 +67,20 @@ export function LegendPanel() {
           label="Provenance : « installé » = dossier skill chez toi ; « 🏬 <nom> » = disponible via une marketplace de plugins." />
       </Section>
 
+      {/* ---- États de connexion (onglet Connexions) ---- */}
+      <Section title="États de connexion — onglet Connexions">
+        <Row sample={<span className="rounded-full bg-emerald-500/10 px-2.5 py-1 text-[11px] font-semibold text-emerald-600 dark:text-emerald-400">🟢 Connecté</span>}
+          label="Le health-check (claude mcp list) a répondu : le serveur MCP fonctionne." />
+        <Row sample={<span className="rounded-full bg-amber-500/15 px-2.5 py-1 text-[11px] font-semibold text-amber-600 dark:text-amber-400">🟠 Auth requise</span>}
+          label="Le serveur répond mais attend une authentification — connecteurs claude.ai : bouton « Reconnecter » ; MCP de plugin : terminal → claude → /mcp." />
+        <Row sample={<span className="rounded-full bg-red-500/10 px-2.5 py-1 text-[11px] font-semibold text-red-500">🔴 Injoignable</span>}
+          label="Pas de réponse : serveur arrêté, binaire manquant ou service distant hors ligne." />
+        <Row sample={<span className="rounded-full bg-sky-500/10 px-2.5 py-1 text-[11px] font-semibold text-sky-600 dark:text-sky-400">🔵 Installée</span>}
+          label="Extension desktop de l'app Claude (pas de health-check possible de l'extérieur)." />
+        <Row sample={<span className="rounded-full bg-black/[.05] px-2.5 py-1 text-[11px] font-semibold text-neutral-500 dark:bg-white/[.08]">MCP perso · MCP de plugin · Connecteur claude.ai · Extension desktop</span>}
+          label="Les 4 familles : tes serveurs (~/.claude.json), ceux des plugins, les connecteurs claude.ai, les extensions de l'app desktop." />
+      </Section>
+
       {/* ---- Couleurs du dashboard ---- */}
       <Section title="Couleurs du Dashboard (palette validée daltonisme & contraste)">
         <div className="cud-viz">

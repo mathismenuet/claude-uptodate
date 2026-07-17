@@ -1,6 +1,6 @@
 {
   "name": "claude-uptodate",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "Local App Store for everything installed from GitHub on this machine: cloned repos, Claude Code skills and plugin marketplaces. Update badges, changelogs, append-only history, safe ff-only updates, visual dashboard.",
   "author": {
     "name": "Mathis Menuet",

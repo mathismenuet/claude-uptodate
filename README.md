@@ -27,6 +27,13 @@ keep the history.
 - 🗺 **Multi-LLM surfaces** — detects Codex, Gemini/Antigravity, Cursor…, inventories
   their skills, and flags **cross-app duplicates** as identical ✅ or out-of-sync ⚠️
   (one-click resync from the newest copy, with backup)
+- 🔌 **Connections** — maps every MCP across all 4 families (your servers, plugin MCPs,
+  claude.ai connectors, desktop extensions) with **real health status**
+  (connected / needs auth / unreachable), grouped by category, and **one-click
+  reconnect actions**; plus an API-key inventory (names only, never values) and your
+  local Docker stacks with copyable update commands
+- 🍺 **Homebrew** — outdated formulae/casks surface in the updates list with a safe
+  per-item upgrade button
 - ❔ **Legend** — every visual code explained + a map of where skills/plugins/MCP/repos
   live and which apps can see them
 - ⬇️ **Safe updates** — `git pull --ff-only` only; anything with local modifications is
@@ -71,6 +78,7 @@ node bin/uptodate.mjs history [name]       # the timeline
 node bin/uptodate.mjs library [--refresh]  # typology library + mission baskets
 node bin/uptodate.mjs usage [name]         # usage stats / per-tool drill-down
 node bin/uptodate.mjs surfaces             # multi-LLM surfaces + duplicates
+node bin/uptodate.mjs connections          # MCP health map + API keys + Docker
 ```
 
 ## Configuration

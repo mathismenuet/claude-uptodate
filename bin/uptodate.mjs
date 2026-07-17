@@ -5,6 +5,7 @@ import * as engine from "../engine/core.mjs";
 import * as library from "../engine/library.mjs";
 import * as usage from "../engine/usage.mjs";
 import * as surfaces from "../engine/surfaces.mjs";
+import * as connections from "../engine/connections.mjs";
 
 const [, , cmd = "help", ...rest] = process.argv;
 const has = (f) => rest.includes(f);
@@ -79,6 +80,25 @@ async function main() {
           console.log(`  ${String(t.count).padStart(4)} × [${t.kind}] ${t.name}  (dernier : ${(t.last || "").slice(0, 10)})`);
         }
         console.log("\nDrill-down : uptodate usage <nom>");
+      }
+      break;
+    }
+    case "connections": {
+      console.error("Vérification des connexions (claude mcp list fait de vrais health-checks)…");
+      const r = await connections.connectionsReport({ refresh: has("--refresh") });
+      const by = { connected: "🟢", "needs-auth": "🟠", failed: "🔴", installed: "🔵", unknown: "⚪" };
+      const counts = {};
+      for (const e of r.mcp) counts[e.status] = (counts[e.status] || 0) + 1;
+      console.log(`🔌 MCP : ${r.mcp.length} — 🟢 ${counts.connected || 0} connectés · 🟠 ${counts["needs-auth"] || 0} auth requise · 🔴 ${counts.failed || 0} injoignables`);
+      for (const e of [...r.mcp].sort((a, b) => a.status.localeCompare(b.status))) {
+        console.log(`  ${by[e.status] || "⚪"} [${e.family}] ${e.name}${e.scope && e.scope !== "global" ? ` (${e.scope.split("/").pop()})` : ""}`);
+      }
+      console.log(`\n🔑 Clés API définies : ${r.apiKeys.rows.filter((k) => k.defined).length}/${r.apiKeys.rows.length} connues` +
+        (r.apiKeys.extra.length ? ` · autres détectées : ${r.apiKeys.extra.join(", ")}` : ""));
+      for (const k of r.apiKeys.rows.filter((k) => k.defined)) console.log(`  ✓ ${k.env} (${k.where.join(", ")})`);
+      if (r.docker.available) {
+        console.log(`\n🐳 Docker : ${r.docker.projects.reduce((n, p) => n + p.containers.length, 0)} conteneurs actifs`);
+        for (const p of r.docker.projects) console.log(`  • ${p.project} : ${p.containers.map((c) => c.name).join(", ")}`);
       }
       break;
     }
