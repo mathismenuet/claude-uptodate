@@ -84,7 +84,8 @@ export default function Home() {
         body: JSON.stringify({ name }),
       });
       const j = await r.json();
-      setUpdateLogs((l) => ({ ...l, [key]: j.log || [] }));
+      // le résultat s'affiche AUSSI dans le bandeau visible (pas seulement le panneau détail)
+      setUpdateLogs((l) => ({ ...l, [key]: j.log || [], __all__: j.log || [] }));
       await runCheck(false); // recalcul rapide sans re-fetch réseau
     } catch (e) {
       setUpdateLogs((l) => ({ ...l, [key]: [String(e)] }));
@@ -342,7 +343,7 @@ export default function Home() {
             rel="noreferrer"
             className="hover:text-[#0071e3]"
           >
-            claude-uptodate v0.4.0 — open source
+            claude-uptodate v0.4.1 — open source
           </a>
         </footer>
       </main>

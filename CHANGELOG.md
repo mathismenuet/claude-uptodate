@@ -2,6 +2,17 @@
 
 Toutes les évolutions notables de Claude UpToDate. / All notable changes.
 
+## [0.4.1] — 2026-07-17
+
+### Corrigé / Fixed
+- **Boutons « Mettre à jour » qui ne faisaient rien** (skills CLI) : quand
+  `npx skills update` ne change rien — contenu identique malgré des commits upstream,
+  ou **skill supprimé du repo source** (ex. lenny-skills reconstruit, remotion-dev
+  réorganisé) — l'alerte est désormais **acquittée** (`acks.json`) : l'élément passe
+  « À jour ✓ » et ne re-flaggera qu'au prochain vrai changement upstream.
+- Le **résultat de chaque mise à jour s'affiche** dans un bandeau visible de la page
+  (avant : uniquement dans le panneau détail → échecs silencieux).
+
 ## [0.4.0] — 2026-07-17
 
 ### Ajouté / Added

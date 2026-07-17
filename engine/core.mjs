@@ -21,6 +21,7 @@ const F = {
   history: path.join(DATA, "history.jsonl"),
   reports: path.join(DATA, "reports"),
   latest: path.join(DATA, "latest.md"),
+  acks: path.join(DATA, "acks.json"), // "MAJ dispo" acquittées : {key: remote_sha ignoré}
 };
 
 const JOURS = ["lundi", "mardi", "mercredi", "jeudi", "vendredi", "samedi", "dimanche"];
@@ -387,6 +388,7 @@ export async function check({ fetch: doFetch = true, rescan = false, onProgress 
   const cfg = await getConfig();
   const manifest = rescan ? await scan() : (await loadJson(F.manifest, null)) || (await scan());
   const mapping = await loadJson(F.mapping, {});
+  const acks = await loadJson(F.acks, {});
   const state = await loadJson(F.state, { items: {} });
   const prevItems = state.items || {};
   const ts = nowIso();
@@ -417,6 +419,11 @@ export async function check({ fetch: doFetch = true, rescan = false, onProgress 
     const rec = recs[idx];
     const prev = prevItems[it.key] || {};
     rec.new_since_last = !!(prev.remote_sha && rec.remote_sha && prev.remote_sha !== rec.remote_sha);
+    // « MAJ dispo » acquittée (upstream inchangé depuis l'acquittement) → à jour
+    if (rec.status === "update_available" && acks[it.key] && acks[it.key] === rec.remote_sha) {
+      rec.status = "ok";
+      rec.acked = true;
+    }
     rec.checked_at = ts;
     results[it.key] = rec;
 
@@ -631,15 +638,35 @@ export async function update({ name = "", all = false } = {}) {
       log.push(`✓ ${it.name} : mis à jour (${commits.length} commit(s)).`);
       updated.push(it.name);
     } else if (it.type === "skill-cli" && !cliDone) {
+      cliDone = true;
+      const cfg = await getConfig();
+      const lockPath = cfg.skill_lock.replace(/^~(?=$|\/)/, os.homedir());
+      const lockBefore = (await loadJson(lockPath, {})).skills || {};
       log.push("→ npx skills update (tous les skills gérés par le CLI)…");
       const r = await sh("npx", ["-y", "skills", "update"], { timeout: 420000 });
-      log.push((r.out || r.err).slice(0, 800));
+      log.push((r.out || r.err).replace(/\x1b\[[0-9;]*m/g, "").slice(0, 800));
       await appendHistory({
         ts: nowIso(), key: "skills-cli", name: "skills CLI", type: "skill-cli",
         event: "updated", detail: (r.out || r.err).slice(0, 500),
       });
-      cliDone = true;
       updated.push("skills CLI");
+      // Acquittement : si le CLI n'a RIEN changé pour un skill pourtant flaggé
+      // (contenu identique malgré des commits, ou skill supprimé upstream),
+      // on mémorise la version upstream vue → plus d'alerte jusqu'au prochain vrai changement.
+      const lockAfter = (await loadJson(lockPath, {})).skills || {};
+      const acks = await loadJson(F.acks, {});
+      for (const t of targets.filter((x) => x.type === "skill-cli")) {
+        const before = lockBefore[t.name]?.updatedAt;
+        const after = lockAfter[t.name]?.updatedAt;
+        const sha = state.items?.[t.key]?.remote_sha;
+        if (before === after && sha) {
+          acks[t.key] = sha;
+          log.push(`ℹ️ ${t.name} : rien à changer côté CLI (contenu identique ou retiré upstream) — alerte acquittée pour cette version.`);
+        } else if (before !== after) {
+          log.push(`✓ ${t.name} : mis à jour par le CLI.`);
+        }
+      }
+      await saveJson(F.acks, acks);
     } else if (it.type === "skill-mapped") {
       log.push(`ℹ️ ${it.name} : copié sans git — pas de MAJ auto. Source : https://github.com/${it.slug}`);
     }

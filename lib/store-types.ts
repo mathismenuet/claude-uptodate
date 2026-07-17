@@ -45,6 +45,7 @@ export interface ItemState {
   fetch_error?: string;
   error?: string;
   new_since_last?: boolean;
+  acked?: boolean; // « MAJ dispo » acquittée (contenu identique / retiré upstream)
   checked_at?: string;
   last_subject?: string;
   baseline_date?: string;
