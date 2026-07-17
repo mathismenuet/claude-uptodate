@@ -2,6 +2,27 @@
 
 Toutes les évolutions notables de Claude UpToDate. / All notable changes.
 
+## [0.3.0] — 2026-07-17
+
+### Ajouté / Added
+- **M3 Surfaces multi-LLM** (`engine/surfaces.mjs`) : détection des applis IA de la
+  machine (Claude Code, Codex, Gemini/Antigravity, Cursor, OpenCode, Ollama),
+  inventaire par surface, **doublons inter-surfaces** avec comparaison de contenu
+  (hash SKILL.md) → identique ✅ / désynchronisé ⚠️, resynchronisation depuis la copie
+  la plus récente (sauvegarde `.bak-<date>`). Onglet 🗺 Surfaces + CLI `surfaces`.
+- **📊 Dashboard d'utilisation** (`engine/usage.mjs`) : scan incrémental des
+  transcripts Claude Code (`~/.claude/projects/**/*.jsonl`, cache par fichier) —
+  skills invoqués, appels MCP, commandes slash. KPIs, activité par semaine
+  (palette catégorielle validée daltonisme/contraste), top outils, **drill-down par
+  outil : date, dossier projet, extrait du prompt, et `claude --resume <session>`
+  pour rouvrir la conversation**. Section « installés mais jamais invoqués ».
+  CLI `usage [nom]`. 100 % local.
+- **❔ Légende** : tous les codes visuels (pastilles, icônes, badges, couleurs) +
+  **cartographie** de où vivent skills/plugins/MCP/repos et quelles applis les voient
+  (Claude Code CLI/desktop/IDE vs claude.ai web, Codex, Gemini/Antigravity, Cursor).
+- **Bibliothèque** : date d'installation sur chaque fiche (birthtime) + **tris**
+  (nom, installé récemment/anciennement, les plus utilisés) + badge « N× » d'usage.
+
 ## [0.2.0] — 2026-07-16
 
 ### Ajouté / Added

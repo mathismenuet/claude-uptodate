@@ -30,3 +30,18 @@ body {
   background: #0071e3;
   color: #fff;
 }
+
+/* Palette dataviz validée (catégorielle, ordre fixe : skill / mcp / commande).
+   Light validée sur surface carte #ffffff, dark sur #1c1c1e (validate_palette.js). */
+.cud-viz {
+  --s-skill: #2a78d6;
+  --s-mcp: #1baf7a;
+  --s-cmd: #eda100;
+}
+@media (prefers-color-scheme: dark) {
+  .cud-viz {
+    --s-skill: #3987e5;
+    --s-mcp: #199e70;
+    --s-cmd: #c98500;
+  }
+}

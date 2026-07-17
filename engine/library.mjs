@@ -184,6 +184,8 @@ export async function libraryScan() {
     if (seen.has(real)) return;
     seen.add(real);
     const dir = path.dirname(skillFile);
+    let installedAt = null;
+    try { installedAt = (await fs.stat(dir)).birthtime.toISOString(); } catch { /* n/a */ }
     const fm = await parseFrontmatter(skillFile);
     const name = fm.name || path.basename(dir);
     const description = firstSentence(fm.description);
@@ -195,6 +197,7 @@ export async function libraryScan() {
       surface,
       container,
       path: dir,
+      installed_at: installedAt,
       description,
       category,
       when: CURATED[name]?.when || WHEN_BY_CAT[category] || "",
@@ -240,10 +243,12 @@ export async function libraryScan() {
     if (seen.has(real)) return;
     seen.add(real);
     const name = path.basename(dir);
+    let installedAt = null;
+    try { installedAt = (await fs.stat(dir)).birthtime.toISOString(); } catch { /* n/a */ }
     const category = CURATED[name]?.category || classify(name, "");
     entries.push({
       id: `${surface}:user:${name}:${entries.length}`, type: "skill", name, surface,
-      container: "user", path: dir, description: "", category,
+      container: "user", path: dir, installed_at: installedAt, description: "", category,
       when: CURATED[name]?.when || WHEN_BY_CAT[category] || "",
       curated: !!CURATED[name], invocation: inv(name),
     });

@@ -8,9 +8,12 @@ import { ItemRow } from "@/components/store/ItemRow";
 import { DetailPanel } from "@/components/store/DetailPanel";
 import { OrphansPanel } from "@/components/store/OrphansPanel";
 import { LibraryPanel } from "@/components/store/LibraryPanel";
+import { DashboardPanel } from "@/components/store/DashboardPanel";
+import { SurfacesPanel } from "@/components/store/SurfacesPanel";
+import { LegendPanel } from "@/components/store/LegendPanel";
 import { isSafeUpdatable, rowKind } from "@/components/store/meta";
 
-type Tab = "all" | "repos" | "skills" | "plugins" | "orphans" | "library";
+type Tab = "all" | "repos" | "skills" | "plugins" | "orphans" | "library" | "dashboard" | "surfaces" | "legend";
 
 const TABS: { id: Tab; label: string }[] = [
   { id: "all", label: "Tout" },
@@ -19,6 +22,9 @@ const TABS: { id: Tab; label: string }[] = [
   { id: "plugins", label: "Plugins" },
   { id: "orphans", label: "Sans source" },
   { id: "library", label: "📚 Bibliothèque" },
+  { id: "dashboard", label: "📊 Dashboard" },
+  { id: "surfaces", label: "🗺 Surfaces" },
+  { id: "legend", label: "❔ Légende" },
 ];
 
 const KIND_ORDER: Record<string, number> = {
@@ -142,6 +148,9 @@ export default function Home() {
     plugins: items.filter((i) => i.type === "marketplace").length,
     orphans: orphans.length,
     library: -1, // le compte vit dans l'onglet lui-même
+    dashboard: -1,
+    surfaces: -1,
+    legend: -1,
   }), [items, orphans]);
 
   const selected = selectedKey ? items.find((i) => i.key === selectedKey) || null : null;
@@ -241,6 +250,12 @@ export default function Home() {
           </div>
         ) : tab === "library" ? (
           <LibraryPanel query={query} />
+        ) : tab === "dashboard" ? (
+          <DashboardPanel query={query} />
+        ) : tab === "surfaces" ? (
+          <SurfacesPanel />
+        ) : tab === "legend" ? (
+          <LegendPanel />
         ) : tab === "orphans" ? (
           <OrphansPanel orphans={orphans} query={query} onMapped={loadSnapshot} />
         ) : !snap?.state ? (
@@ -292,7 +307,7 @@ export default function Home() {
             rel="noreferrer"
             className="hover:text-[#0071e3]"
           >
-            claude-uptodate v0.1.0 — open source
+            claude-uptodate v0.3.0 — open source
           </a>
         </footer>
       </main>

@@ -3,6 +3,8 @@
 //   node bin/uptodate.mjs scan | check [--no-fetch] | report | update <nom>|--all | map <skill> <owner/repo> [--path p] | history [nom]
 import * as engine from "../engine/core.mjs";
 import * as library from "../engine/library.mjs";
+import * as usage from "../engine/usage.mjs";
+import * as surfaces from "../engine/surfaces.mjs";
 
 const [, , cmd = "help", ...rest] = process.argv;
 const has = (f) => rest.includes(f);
@@ -11,6 +13,7 @@ const val = (f, d = "") => {
   return i >= 0 && rest[i + 1] ? rest[i + 1] : d;
 };
 const positional = rest.filter((a, i) => !a.startsWith("--") && rest[i - 1] !== "--path");
+const path_short = (p) => (p || "").replace(process.env.HOME || "", "~").split("/").slice(-2).join("/");
 
 async function main() {
   switch (cmd) {
@@ -58,6 +61,39 @@ async function main() {
       }
       console.log(`\n🧺 Paniers : ${lib.baskets.map((b) => `${b.emoji} ${b.label} (${b.items.length})`).join(" · ")}`);
       console.log("\nInterface : npm run dev -- -p 4517 → onglet Bibliothèque. --refresh pour re-scanner.");
+      break;
+    }
+    case "usage": {
+      if (positional[0]) {
+        const d = await usage.readUsage({ name: positional[0] });
+        console.log(`🔎 ${d.name} — ${d.total} utilisation(s)`);
+        for (const e of d.events.slice(0, 25)) {
+          console.log(`  ${(e.ts || "").slice(0, 16).replace("T", " ")} · ${path_short(e.cwd)} · ${e.sessionId.slice(0, 8)}`);
+          if (e.snippet) console.log(`     « ${e.snippet} »`);
+        }
+      } else {
+        const d = await usage.readUsage({ refresh: has("--refresh") });
+        console.log(`📊 Usage : ${d.totals.events} évènements (${d.totals.skills} skills · ${d.totals.mcp} MCP · ${d.totals.commands} commandes) sur ${d.totals.transcripts} transcripts — ${d.totals.distinct_tools} outils distincts`);
+        console.log("\nTop 15 :");
+        for (const t of d.tools.slice(0, 15)) {
+          console.log(`  ${String(t.count).padStart(4)} × [${t.kind}] ${t.name}  (dernier : ${(t.last || "").slice(0, 10)})`);
+        }
+        console.log("\nDrill-down : uptodate usage <nom>");
+      }
+      break;
+    }
+    case "surfaces": {
+      const r = await surfaces.surfacesReport();
+      console.log("🗺 Surfaces détectées :");
+      for (const s of r.surfaces) {
+        console.log(`  ${s.icon} ${s.label} — ${s.detected ? "présent" : "absent"}${s.skills ? ` · ${s.skills} skills` : ""}`);
+      }
+      const desync = r.duplicates.filter((d) => !d.identical);
+      console.log(`\n♻️ Doublons inter-surfaces : ${r.duplicates.length} (dont ${desync.length} désynchronisés)`);
+      for (const d of r.duplicates) {
+        console.log(`  ${d.identical ? "✅" : "⚠️"} ${d.name} — ${d.copies.map((c) => c.surface).join(" + ")}${d.identical ? "" : ` · + récent : ${d.newest_surface}`}`);
+      }
+      if (desync.length) console.log("\nResynchroniser : via l'onglet Surfaces de l'app (sauvegarde auto).");
       break;
     }
     case "history": {

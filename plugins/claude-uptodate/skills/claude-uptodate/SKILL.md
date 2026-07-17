@@ -26,6 +26,8 @@ node "$APP_ROOT/bin/uptodate.mjs" update <name>|--all  # safe updates (ff-only, 
 node "$APP_ROOT/bin/uptodate.mjs" map <skill> <owner/repo> [--path sub/dir]
 node "$APP_ROOT/bin/uptodate.mjs" history [name]
 node "$APP_ROOT/bin/uptodate.mjs" library [--refresh]   # typology library + mission baskets
+node "$APP_ROOT/bin/uptodate.mjs" usage [name]          # usage stats / drill-down (local transcripts)
+node "$APP_ROOT/bin/uptodate.mjs" surfaces              # multi-LLM surfaces + cross-app duplicates
 ```
 
 Data lives in `~/.claude/repo-radar/` (config.json to customize scan roots, history.jsonl

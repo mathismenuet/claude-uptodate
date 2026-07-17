@@ -6,14 +6,14 @@
   },
   "metadata": {
     "description": "Local App Store for everything installed from GitHub: cloned repos, Claude Code skills and plugin marketplaces — update badges, changelogs, history.",
-    "version": "0.2.0"
+    "version": "0.3.0"
   },
   "plugins": [
     {
       "name": "claude-uptodate",
       "source": "./plugins/claude-uptodate",
       "description": "Track updates of your cloned GitHub repos, skills and Claude plugins. /uptodate command + skill + local web dashboard.",
-      "version": "0.2.0",
+      "version": "0.3.0",
       "author": {
         "name": "Mathis Menuet",
         "url": "https://github.com/mathismenuet"

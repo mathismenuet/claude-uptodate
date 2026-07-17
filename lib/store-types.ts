@@ -96,6 +96,7 @@ export interface LibraryEntry {
   surface: "claude" | "codex" | "gemini" | string;
   container: string; // "user" | "marketplace:<nom>"
   path: string;
+  installed_at?: string | null;
   description: string;
   category: string;
   when: string;
@@ -124,4 +125,84 @@ export interface LibraryData {
   categories: LibraryCategory[];
   entries: LibraryEntry[];
   baskets: LibraryBasket[];
+}
+
+// ------------------------------ M3 Usage & Surfaces ------------------------------
+
+export type UsageKind = "skill" | "mcp" | "command";
+
+export interface UsageTool {
+  name: string;
+  kind: UsageKind;
+  count: number;
+  first: string;
+  last: string;
+  sessions: number;
+}
+
+export interface UsageWeek {
+  start: string; // lundi ISO (YYYY-MM-DD)
+  skills: number;
+  mcp: number;
+  commands: number;
+}
+
+export interface UsageData {
+  generated_at: string;
+  totals: {
+    events: number;
+    skills: number;
+    mcp: number;
+    commands: number;
+    distinct_tools: number;
+    transcripts: number;
+  };
+  tools: UsageTool[];
+  weeks: UsageWeek[];
+}
+
+export interface UsageEvent {
+  ts: string;
+  kind: UsageKind;
+  name: string;
+  sessionId: string;
+  cwd: string;
+  snippet: string;
+}
+
+export interface UsageDrill {
+  name: string;
+  total: number;
+  events: UsageEvent[];
+}
+
+export interface SurfaceInfo {
+  id: string;
+  label: string;
+  icon: string;
+  detected: boolean;
+  skills: number;
+  skillsDirs: string[];
+  note: string;
+}
+
+export interface DuplicateCopy {
+  surface: string;
+  dir: string;
+  hash: string;
+  mtime: string | null;
+}
+
+export interface DuplicateGroup {
+  name: string;
+  copies: DuplicateCopy[];
+  identical: boolean;
+  newest: string;
+  newest_surface: string;
+}
+
+export interface SurfacesReport {
+  generated_at: string;
+  surfaces: SurfaceInfo[];
+  duplicates: DuplicateGroup[];
 }
