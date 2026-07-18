@@ -2,6 +2,21 @@
 
 Toutes les évolutions notables de Claude UpToDate. / All notable changes.
 
+## [0.5.0] — 2026-07-17
+
+### Ajouté / Added
+- **Traçabilité de la source partout** (`engine/sources.mjs`) : chaque skill et chaque
+  MCP porte désormais des liens cliquables **Repo GitHub** / **Site** / **npm** pour
+  remonter à l'origine.
+  - Skills : résolus depuis le `plugin.json` du plugin (homepage/repository), le remote
+    de la marketplace, le lock npx-skills, un mapping d'orphelin, ou le remote git du
+    clone — **749/944 skills sourcés**.
+  - MCP : table de correspondance des serveurs connus + dérivation depuis le transport
+    (URL HTTP → site + endpoint, commande npx → page npm) + `plugin.json` — **52/53 MCP
+    sourcés**, toutes familles (perso, plugin, connecteur claude.ai, extension desktop).
+  - Composant `SourceLinks` réutilisé dans la Bibliothèque et les Connexions ; entrée
+    dédiée dans la Légende.
+
 ## [0.4.1] — 2026-07-17
 
 ### Corrigé / Fixed

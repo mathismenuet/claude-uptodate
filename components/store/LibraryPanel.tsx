@@ -3,6 +3,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { ArrowUpDown, Check, Copy, Loader2, RefreshCw, ShoppingBasket, X } from "lucide-react";
 import { ago } from "@/lib/format";
 import type { LibraryBasket, LibraryData, LibraryEntry, UsageData } from "@/lib/store-types";
+import { SourceLinks } from "./SourceLinks";
 
 type SortMode = "az" | "recent" | "oldest" | "used";
 const SORTS: { id: SortMode; label: string }[] = [
@@ -72,6 +73,9 @@ function EntryCard({ e, used }: { e: LibraryEntry; used: number }) {
           {containerLabel(e.container)}
           {e.installed_at && <><br />⤓ {ago(e.installed_at)}</>}
         </span>
+      </div>
+      <div className="flex items-center justify-between gap-2 border-t border-black/5 pt-2 dark:border-white/10">
+        <SourceLinks source={e.source} />
       </div>
     </div>
   );

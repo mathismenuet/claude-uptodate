@@ -93,6 +93,18 @@ export function LegendPanel() {
         </div>
       </Section>
 
+      {/* ---- Remonter à la source ---- */}
+      <Section title="Remonter à la source (Bibliothèque & Connexions)">
+        <Row sample={<span className="flex w-fit items-center gap-1 rounded-full border border-black/10 px-2 py-0.5 text-[11px] font-medium text-neutral-600 dark:border-white/15 dark:text-neutral-300">Repo</span>}
+          label="Ouvre le dépôt GitHub d'origine du skill / plugin / MCP." />
+        <Row sample={<span className="flex w-fit items-center gap-1 rounded-full border border-black/10 px-2 py-0.5 text-[11px] font-medium text-neutral-600 dark:border-white/15 dark:text-neutral-300">Site</span>}
+          label="Ouvre le site officiel (éditeur du service, doc du connecteur…)." />
+        <Row sample={<span className="flex w-fit items-center gap-1 rounded-full border border-black/10 px-2 py-0.5 text-[11px] font-medium text-neutral-600 dark:border-white/15 dark:text-neutral-300">npm</span>}
+          label="Page npm du paquet (MCP lancé via npx), à défaut de repo connu." />
+        <Row sample={<span className="text-[11px] text-neutral-400">source inconnue</span>}
+          label="Origine non résolue (souvent un skill orphelin) → onglet « Sans source » pour le mapper." />
+      </Section>
+
       {/* ---- Catégories ---- */}
       <Section title="Catégories d'usage (Bibliothèque)">
         <div className="flex flex-wrap gap-2">

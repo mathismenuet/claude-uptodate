@@ -6,7 +6,8 @@
 import { promises as fs, existsSync } from "node:fs";
 import os from "node:os";
 import path from "node:path";
-import { DATA } from "./core.mjs";
+import { DATA, sh, githubSlug } from "./core.mjs";
+import { nearestPluginJson, normRepo } from "./sources.mjs";
 
 const LIBRARY_F = path.join(DATA, "library.json");
 const OVERRIDES_F = path.join(DATA, "library-overrides.json");
@@ -177,6 +178,46 @@ async function* walkSkillFiles(root, maxdepth = 6) {
 export async function libraryScan() {
   const entries = [];
   const seen = new Set(); // realpath dedupe
+  const mktRoot = (mkt) => path.join(home("~/.claude/plugins/marketplaces"), mkt);
+  const mktRemoteCache = {};
+  async function marketplaceSource(mkt) {
+    if (mktRemoteCache[mkt] !== undefined) return mktRemoteCache[mkt];
+    const { out } = await sh("git", ["-C", mktRoot(mkt), "remote", "get-url", "origin"], { timeout: 8000 });
+    const slug = githubSlug(out);
+    mktRemoteCache[mkt] = slug ? { repo: `https://github.com/${slug}` } : null;
+    return mktRemoteCache[mkt];
+  }
+  // lock npx-skills : name -> sourceUrl (repo d'origine du skill)
+  const lockMap = {};
+  for (const [n, e] of Object.entries((await loadJson(home("~/.agents/.skill-lock.json"), {})).skills || {})) {
+    if (e.sourceUrl || e.source) lockMap[n] = e.sourceUrl || e.source;
+  }
+
+  async function resolveSource(dir, surface, container, name) {
+    // 0) orphelin déjà mappé manuellement à sa source
+    if (mapping[name]?.slug) return { repo: `https://github.com/${mapping[name].slug}` };
+    // 1) skill géré par npx-skills → repo du lock
+    if (lockMap[name]) return { repo: normRepo(lockMap[name]) };
+    // 2) skill de marketplace → plugin.json le plus proche, sinon remote de la marketplace
+    if (container.startsWith("marketplace:")) {
+      const mkt = container.slice("marketplace:".length);
+      const pj = await nearestPluginJson(dir, mktRoot(mkt));
+      if (pj) {
+        const repo = normRepo(pj.repository?.url || pj.repository || pj.homepage);
+        const homepage = (typeof pj.homepage === "string" && !/github\.com/.test(pj.homepage)) ? pj.homepage
+          : (pj.author?.url && !/github\.com/.test(pj.author.url) ? pj.author.url : null);
+        if (repo || homepage) return { repo, homepage };
+      }
+      return (await marketplaceSource(mkt)) || {};
+    }
+    // 3) skill user cloné en git → remote origin
+    if (existsSync(path.join(dir, ".git"))) {
+      const { out } = await sh("git", ["-C", dir, "remote", "get-url", "origin"], { timeout: 8000 });
+      const slug = githubSlug(out);
+      if (slug) return { repo: `https://github.com/${slug}` };
+    }
+    return {};
+  }
 
   async function addSkill(skillFile, surface, container, invocationHint) {
     let real;
@@ -190,6 +231,7 @@ export async function libraryScan() {
     const name = fm.name || path.basename(dir);
     const description = firstSentence(fm.description);
     const category = CURATED[name]?.category || classify(name, fm.description || "");
+    const source = await resolveSource(dir, surface, container, name);
     entries.push({
       id: `${surface}:${container}:${name}:${entries.length}`,
       type: "skill",
@@ -203,6 +245,7 @@ export async function libraryScan() {
       when: CURATED[name]?.when || WHEN_BY_CAT[category] || "",
       curated: !!CURATED[name],
       invocation: invocationHint(name),
+      source,
     });
   }
 
@@ -246,11 +289,12 @@ export async function libraryScan() {
     let installedAt = null;
     try { installedAt = (await fs.stat(dir)).birthtime.toISOString(); } catch { /* n/a */ }
     const category = CURATED[name]?.category || classify(name, "");
+    const source = await resolveSource(dir, surface, "user", name);
     entries.push({
       id: `${surface}:user:${name}:${entries.length}`, type: "skill", name, surface,
       container: "user", path: dir, installed_at: installedAt, description: "", category,
       when: CURATED[name]?.when || WHEN_BY_CAT[category] || "",
-      curated: !!CURATED[name], invocation: inv(name),
+      curated: !!CURATED[name], invocation: inv(name), source,
     });
   }
   const surfaces = [

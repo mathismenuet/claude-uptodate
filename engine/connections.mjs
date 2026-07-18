@@ -9,6 +9,7 @@ import os from "node:os";
 import path from "node:path";
 import { DATA, sh } from "./core.mjs";
 import { classify } from "./library.mjs";
+import { pluginSourceIndex, resolveMcpSource } from "./sources.mjs";
 
 const H = os.homedir();
 const CONN_F = path.join(DATA, "connections.json");
@@ -110,6 +111,7 @@ export async function mcpReport({ withHealth = true } = {}) {
       entries.push({ name: short, family: "plugin", scope: key.split(":")[1] || "", transport: st.detail.includes("(HTTP)") ? "http" : "stdio", detail: st.detail, status: st.status });
     }
   }
+  const pluginIdx = await pluginSourceIndex();
   for (const e of entries) {
     if (!e.status) {
       const st = health.map[e.name] || health.map[`plugin:${e.scope}:${e.name}`];
@@ -119,6 +121,7 @@ export async function mcpReport({ withHealth = true } = {}) {
       else e.status = "unknown";
     }
     e.category = classify(e.name, e.detail || "");
+    e.source = resolveMcpSource(e, pluginIdx);
     e.actions = actionsFor(e);
   }
   return { entries, health_error: health.error || null };

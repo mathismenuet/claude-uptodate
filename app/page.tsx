@@ -343,7 +343,7 @@ export default function Home() {
             rel="noreferrer"
             className="hover:text-[#0071e3]"
           >
-            claude-uptodate v0.4.1 — open source
+            claude-uptodate v0.5.0 — open source
           </a>
         </footer>
       </main>

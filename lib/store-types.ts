@@ -98,6 +98,13 @@ export interface Snapshot {
 
 // ------------------------------ M2 Bibliothèque ------------------------------
 
+export interface ToolSource {
+  repo?: string | null;
+  homepage?: string | null;
+  npm?: string | null;
+  endpoint?: string | null;
+}
+
 export interface LibraryEntry {
   id: string;
   type: "skill";
@@ -111,6 +118,7 @@ export interface LibraryEntry {
   when: string;
   curated: boolean;
   invocation: string;
+  source?: ToolSource;
 }
 
 export interface LibraryCategory {
@@ -235,6 +243,7 @@ export interface McpEntry {
   status: McpStatus;
   category: string;
   actions: McpAction[];
+  source?: ToolSource | null;
 }
 
 export interface ApiKeyRow {

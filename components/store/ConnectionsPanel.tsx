@@ -4,6 +4,7 @@ import { Check, Copy, ExternalLink, KeyRound, Loader2, Plug, RefreshCw, Ship } f
 import { ago } from "@/lib/format";
 import type { ConnectionsReport, McpEntry, McpStatus } from "@/lib/store-types";
 import { CATEGORIES } from "./meta-categories";
+import { SourceLinks } from "./SourceLinks";
 
 const STATUS_META: Record<McpStatus, { label: string; cls: string; dot: string }> = {
   connected: { label: "Connecté", cls: "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400", dot: "🟢" },
@@ -125,7 +126,10 @@ export function ConnectionsPanel({ query }: { query: string }) {
                   {STATUS_META[e.status].dot} {STATUS_META[e.status].label}
                 </span>
                 <span className="min-w-0 flex-1">
-                  <span className="block truncate font-medium">{e.name}</span>
+                  <span className="flex items-center gap-2">
+                    <span className="truncate font-medium">{e.name}</span>
+                    <SourceLinks source={e.source} compact />
+                  </span>
                   <span className="block truncate text-[11px] text-neutral-400" title={e.detail}>
                     {FAMILY_LABEL[e.family]}{e.scope && e.scope !== "global" && e.scope !== "claude.ai" && e.scope !== "app Claude" ? ` · ${e.scope.split("/").pop()}` : ""} · {e.transport}
                   </span>
